@@ -36,11 +36,7 @@ function buildTag() {
 	docker build --pull -t "$image" "$repo/$tag" || \
 		{ echo -e "ERROR: Failed to build image '$image'.\n\n" >&2; return; }
 
-	echo "Publishing image '$image'..."
-	docker push "$image" || \
-		{ echo -e "ERROR: Failed to publish image '$image'.\n\n" >&2; return; }
-
-	echo -e "Image '$image' published.\n\n"
+	echo -e "Image '$image' was built successfully.\n\n"
 }
 
 function buildRepo() {
