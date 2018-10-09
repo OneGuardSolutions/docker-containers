@@ -26,12 +26,12 @@ function buildTag() {
 
 	if [[ ! -d "$BASE_DIR/$repo/$tag" ]]; then
 		echo -e "ERROR: No such tag: '$image'.\n" >&2
-		return
+		exit 1
 	fi
 
 	if [[ ! -f "$BASE_DIR/$repo/$tag/Dockerfile" ]]; then
 		echo "Docker file for '$image' not found" >&2
-		return
+		exit 1
 	fi
 
 	echo ">>> Building image '$image'..."
@@ -49,7 +49,7 @@ function buildRepo() {
 	repo="$1"
 	if [[ ! -d "$BASE_DIR/$repo" ]]; then
 		echo -e "ERROR: No such repository: '$repo'.\n" >&2
-		return
+		exit 1
 	fi
 
 	source "$BASE_DIR/$repo/repository.conf"
@@ -63,6 +63,7 @@ function buildRepo() {
 			buildTag "$repo" "$tag"
 		else			
 			echo -e "ERROR: No such tag: '$namespace/$repo:$tag'.\n" >&2
+			exit 2
 		fi
 	done
 	echo -e "<<<<<< Repository '$namespace/$repo' built.\n"
