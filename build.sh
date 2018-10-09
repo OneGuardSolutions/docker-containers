@@ -40,7 +40,7 @@ function buildTag() {
 	echo -e "<<< Image '$image' was built successfully."
 
 	echo ">>> Pushing image '$image'..."
-	docker push "$image"|| \
+	docker push "$image" || \
 		{ echo -e "ERROR: Failed to push image '$image'.\n\n" >&2; exit 1; }
 	echo -e "<<< Image '$image' was pushed successfully.\n"
 }
