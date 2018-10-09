@@ -36,12 +36,12 @@ function buildTag() {
 
 	echo ">>> Building image '$image'..."
 	docker build --pull -t "$image" "$BASE_DIR/$repo/$tag" || \
-		{ echo -e "ERROR: Failed to build image '$image'.\n\n" >&2; return; }
+		{ echo -e "ERROR: Failed to build image '$image'.\n\n" >&2; exit 1; }
 	echo -e "<<< Image '$image' was built successfully."
 
 	echo ">>> Pushing image '$image'..."
 	docker push "$image"|| \
-		{ echo -e "ERROR: Failed to push image '$image'.\n\n" >&2; return; }
+		{ echo -e "ERROR: Failed to push image '$image'.\n\n" >&2; exit 1; }
 	echo -e "<<< Image '$image' was pushed successfully.\n"
 }
 
@@ -89,7 +89,7 @@ if [ "$#" -ne "1" ] || [ "$1" == "--help" ]; then
 fi
 
 if [ "$(grep -c : <<< "$1")" -eq "0" ]; then
-	buildRepo "$1" || exit 1
+	buildRepo "$1"
 	exit
 fi
 
