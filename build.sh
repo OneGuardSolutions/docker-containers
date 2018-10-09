@@ -60,10 +60,10 @@ function buildRepo() {
 	echo -e ">>>>>> Building repository '$namespace/$repo':\n"
 	for tag in $tags; do
 		if [[ -d "$BASE_DIR/$repo/$tag" ]]; then
-			buildTag "$repo" "$tag"
+			buildTag "$repo" "$tag" || exit 1
 		else			
 			echo -e "ERROR: No such tag: '$namespace/$repo:$tag'.\n" >&2
-			exit 2
+			exit 1
 		fi
 	done
 	echo -e "<<<<<< Repository '$namespace/$repo' built.\n"
@@ -73,23 +73,23 @@ function buildRepo() {
 function buildAll() {
 	for repo in $(ls); do
 		if [[ -d "$BASE_DIR/$repo" ]]; then
-			buildRepo "$repo"
+			buildRepo "$repo" || exit 1
 		fi
 	done
 }
 
 if [ "$#" -eq "0" ]; then
-	buildAll
+	buildAll || exit 1
 	exit
 fi
 
 if [ "$#" -ne "1" ] || [ "$1" == "--help" ]; then
-	printHelp
+	printHelp || exit 1
 	exit
 fi
 
 if [ "$(grep -c : <<< "$1")" -eq "0" ]; then
-	buildRepo "$1"
+	buildRepo "$1" || exit 1
 	exit
 fi
 
