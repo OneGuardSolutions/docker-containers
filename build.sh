@@ -1,6 +1,5 @@
 #!/bin/bash
 
-PREFIX="oneguard"
 BASE_DIR="$(dirname "$0")"
 
 function printHelp() {
@@ -21,9 +20,12 @@ EOF
 function buildTag() {
 	repo="$1"
 	tag="$2"
-	image="$PREFIX/$repo:$tag"
+
+	source "$BASE_DIR/$repo/repository.conf"
+	image="$namespace/$repo:$tag"
+
 	if [[ ! -d "$BASE_DIR/$repo/$tag" ]]; then
-		echo -e "ERROR: No such tag: '$repo:$tag'.\n" >&2
+		echo -e "ERROR: No such tag: '$image'.\n" >&2
 		return
 	fi
 
@@ -32,11 +34,15 @@ function buildTag() {
 		return
 	fi
 
-	echo "Building image '$image'..."
-	docker build --pull -t "$image" "$repo/$tag" || \
+	echo ">>> Building image '$image'..."
+	docker build --pull -t "$image" "$BASE_DIR/$repo/$tag" || \
 		{ echo -e "ERROR: Failed to build image '$image'.\n\n" >&2; return; }
+	echo -e "<<< Image '$image' was built successfully."
 
-	echo -e "Image '$image' was built successfully.\n\n"
+	echo ">>> Pushing image '$image'..."
+	docker push "$image"|| \
+		{ echo -e "ERROR: Failed to push image '$image'.\n\n" >&2; return; }
+	echo -e "<<< Image '$image' was pushed successfully.\n"
 }
 
 function buildRepo() {
@@ -46,11 +52,20 @@ function buildRepo() {
 		return
 	fi
 
-	for tag in $(ls "$BASE_DIR/$repo"); do
+	source "$BASE_DIR/$repo/repository.conf"
+	tags="${order//,/\\n}\\n${order//,/\\n}\\n$(cd "$BASE_DIR/$repo" && find * -maxdepth 0 -type d)"
+	tags="$(echo -e "$tags" | sort | uniq -u)"
+	tags="${order//,/ } $tags"
+
+	echo -e ">>>>>> Building repository '$namespace/$repo':\n"
+	for tag in $tags; do
 		if [[ -d "$BASE_DIR/$repo/$tag" ]]; then
 			buildTag "$repo" "$tag"
+		else			
+			echo -e "ERROR: No such tag: '$namespace/$repo:$tag'.\n" >&2
 		fi
 	done
+	echo -e "<<<<<< Repository '$namespace/$repo' built.\n"
 }
 
 
